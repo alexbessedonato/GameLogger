@@ -2,28 +2,26 @@ import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
 
-interface LoginFormInputs {
+interface SignUpFormInputs {
+  username: string;
   email: string;
   password: string;
 }
 
 interface LoginPopUpProps {
   closePopup: () => void;
-  onLoginSuccess: (username: string) => void;
+  onSignUpSuccess: (username: string) => void;
 }
 
-const LoginPopUp: React.FC<LoginPopUpProps> = ({
+const signUpPopUp: React.FC<LoginPopUpProps> = ({
   closePopup,
-  onLoginSuccess,
+  onSignUpSuccess,
 }) => {
-  const { register, handleSubmit } = useForm<LoginFormInputs>();
+  const { register, handleSubmit } = useForm<SignUpFormInputs>();
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<SignUpFormInputs> = async (data) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/auth/login",
-        data
-      );
+      const response = await axios.post("http://localhost:5000/signup", data);
       const { token, username } = response.data;
 
       // Save token and username in localStorage
@@ -31,12 +29,12 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
       localStorage.setItem("username", username);
 
       // Update Navbar state with username
-      onLoginSuccess(username);
+      onSignUpSuccess(username);
 
       // Close popup after successful login
       closePopup();
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("Sign up failed", error);
     }
   };
 
@@ -44,9 +42,21 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Log In
+          SignUp
         </h2>
         <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Username
+            </label>
+            <input
+              type="username"
+              {...register("username", { required: true })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-transparent transition-colors duration-300"
+              placeholder="Enter your username"
+            />
+          </div>
+
           <div className="mb-5">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email
@@ -58,10 +68,11 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
               placeholder="Enter your email"
             />
           </div>
+
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Password
+          </label>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
             <input
               type="password"
               {...register("password", { required: true })}
@@ -69,6 +80,7 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
               placeholder="Enter your password"
             />
           </div>
+
           <div className="flex items-center justify-between">
             <button
               type="submit"
@@ -77,6 +89,7 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
               Log In
             </button>
           </div>
+
           <div className="flex justify-center mt-4">
             <button
               onClick={closePopup}
@@ -91,4 +104,4 @@ const LoginPopUp: React.FC<LoginPopUpProps> = ({
   );
 };
 
-export default LoginPopUp;
+export default signUpPopUp;

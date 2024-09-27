@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LoginPopUp from "./loginPopUp"; // Import the login pop-up component
+import SignUpPopUp from "./signUpPopUp"; // Import the login pop-up component
 
 const Navbar: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,6 +24,9 @@ const Navbar: React.FC = () => {
 
   const openLogin = () => setIsLoginOpen(true);
   const closeLogin = () => setIsLoginOpen(false);
+
+  const openSignUp = () => setIsSignUpOpen(true);
+  const closeSignUp = () => setIsSignUpOpen(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -94,7 +102,10 @@ const Navbar: React.FC = () => {
               >
                 Log In
               </button>
-              <button className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300">
+              <button
+                className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300"
+                onClick={openSignUp}
+              >
                 Sign Up
               </button>
             </>
@@ -110,6 +121,16 @@ const Navbar: React.FC = () => {
           closePopup={closeLogin}
           onLoginSuccess={(username: string) => {
             setIsLoggedIn(true);
+            setUsername(username);
+          }}
+        />
+      )}
+
+      {isSignUpOpen && (
+        <SignUpPopUp
+          closePopup={closeSignUp}
+          onSignUpSuccess={(username: string) => {
+            setIsSignedUp(true);
             setUsername(username);
           }}
         />
