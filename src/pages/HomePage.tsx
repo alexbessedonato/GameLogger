@@ -1,14 +1,14 @@
 import React from "react";
 import HeroSection from "../components/HeroSection";
 import Navbar from "../components/Navbar";
-import FeaturedGames from "../components/FeaturedGames";
+import SeachGames from "../components/SearchGames";
 
 const HomePage: React.FC = () => {
   return (
     <div>
       <Navbar />
       <HeroSection />
-      <FeaturedGames />
+      <SeachGames />
     </div>
   );
 };
