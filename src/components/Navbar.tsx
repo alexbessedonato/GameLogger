@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import LoginPopUp from "./loginPopUp"; // Import the LoginPopUp component
 
 const Navbar: React.FC = () => {
+  // State to control the visibility of the LoginPopUp
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const openLogin = () => setIsLoginOpen(true); // Function to open the login pop-up
+  const closeLogin = () => setIsLoginOpen(false); // Function to close the login pop-up
+
   return (
     <nav className="bg-gray-800 p-3 w-full shadow-sm sticky top-0 z-50">
       <div className="relative w-full flex items-center">
@@ -52,7 +59,10 @@ const Navbar: React.FC = () => {
 
         {/* Buttons moved to the right */}
         <div className="flex-1 flex justify-end space-x-4">
-          <button className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300">
+          <button
+            className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300"
+            onClick={openLogin} // Show Login pop-up when clicked
+          >
             Log In
           </button>
           <button className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300">
@@ -66,6 +76,9 @@ const Navbar: React.FC = () => {
 
       {/* Gradient for fade effect at the bottom */}
       <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-b from-gray-800 to-transparent"></div>
+
+      {/* Render LoginPopUp if isLoginOpen is true */}
+      {isLoginOpen && <LoginPopUp closePopup={closeLogin} />}
     </nav>
   );
 };

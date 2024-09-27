@@ -65,7 +65,7 @@ const TopGames: React.FC = () => {
               {/* Contenedor del título y rating con gradiente superior */}
               <div className="absolute bottom-0 left-0 bg-gray-900 bg-opacity-35 p-2 w-full bg-gradient-to-t from-gray-900 to-transparent">
                 <h3 className="text-lg font-bold text-cyan-400">{game.name}</h3>
-                <h2 className="text-white text-sm font-semibold">
+                <h2 className="text-white text-xl font-bold">
                   {game.rating ? `${game.rating}/100` : "No rating available"}
                 </h2>
               </div>
