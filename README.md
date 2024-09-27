@@ -2,7 +2,7 @@ Here's a detailed README for the GameLogger project based on the given descripti
 
 ---
 
-# 🎮 GameLogger
+![GameLogger](./public/images/Original-sobre-transparente.png)
 
 **GameLogger** is a web application designed to help gamers easily track their game progress and manage a wishlist of games they plan to play. This tool provides an organized way to monitor game completion, maintain a catalog of games, and keep track of upcoming titles.
 
