@@ -1,18 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import LoginPopUp from "./loginPopUp"; // Import the LoginPopUp component
+import LoginPopUp from "./loginPopUp"; // Import the login pop-up component
 
 const Navbar: React.FC = () => {
-  // State to control the visibility of the LoginPopUp
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  const openLogin = () => setIsLoginOpen(true); // Function to open the login pop-up
-  const closeLogin = () => setIsLoginOpen(false); // Function to close the login pop-up
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUsername = localStorage.getItem("username");
+
+    if (token && storedUsername) {
+      setIsLoggedIn(true);
+      setUsername(storedUsername);
+    }
+  }, []);
+
+  const openLogin = () => setIsLoginOpen(true);
+  const closeLogin = () => setIsLoginOpen(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setIsLoggedIn(false);
+    setUsername(null);
+  };
 
   return (
     <nav className="bg-gray-800 p-3 w-full shadow-sm sticky top-0 z-50">
       <div className="relative w-full flex items-center">
-        {/* Left side with the GameLogger logo */}
         <div className="flex-1 flex flex-col items-start">
           <img
             src="/images/Original sobre transparente(1).png"
@@ -21,8 +38,7 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Centered Navbar Links */}
-        <ul className="flex space-x-4">
+        <ul className="flex space-x-4 ml-12">
           <li>
             <Link
               to="/"
@@ -57,28 +73,47 @@ const Navbar: React.FC = () => {
           </li>
         </ul>
 
-        {/* Buttons moved to the right */}
-        <div className="flex-1 flex justify-end space-x-4">
-          <button
-            className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300"
-            onClick={openLogin} // Show Login pop-up when clicked
-          >
-            Log In
-          </button>
-          <button className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300">
-            Sign Up
-          </button>
+        <div className="flex-1 flex justify-end space-x-4 mr-6">
+          {isLoggedIn ? (
+            <>
+              <span className="text-white text-lg font-bold px-4 py-1">
+                Welcome, {username}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300 mr-12"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300"
+                onClick={openLogin}
+              >
+                Log In
+              </button>
+              <button className="bg-cyan-600 text-white px-4 py-1 rounded-md hover:bg-cyan-700 transition duration-300">
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Padding to prevent content from overlapping the gradient */}
       <div className="pb-2"></div>
-
-      {/* Gradient for fade effect at the bottom */}
       <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-b from-gray-800 to-transparent"></div>
 
-      {/* Render LoginPopUp if isLoginOpen is true */}
-      {isLoginOpen && <LoginPopUp closePopup={closeLogin} />}
+      {isLoginOpen && (
+        <LoginPopUp
+          closePopup={closeLogin}
+          onLoginSuccess={(username: string) => {
+            setIsLoggedIn(true);
+            setUsername(username);
+          }}
+        />
+      )}
     </nav>
   );
 };
