@@ -68,4 +68,4 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 ---
 
-Let me know if you'd like to add or modify any sections!
+Let me know if you'd like to add or modify any sections! Thanks
