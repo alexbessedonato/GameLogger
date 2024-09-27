@@ -86,7 +86,7 @@ const signUpPopUp: React.FC<LoginPopUpProps> = ({
               type="submit"
               className="bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-600 transition duration-300 w-full"
             >
-              Log In
+              Sign Up
             </button>
           </div>
 
