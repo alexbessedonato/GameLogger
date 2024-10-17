@@ -1,40 +1,39 @@
-// models/UserGame.js
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/config"); // Import sequelize instance
+const { Sequelize, DataTypes } = require("sequelize");
+const sequelize = require("../config/config");
 const User = require("./user"); // Import User model
 
-// Define the UserGame model
-const UserGame = sequelize.define("UserGame", {
-  name: {
+const UserGames = sequelize.define("UserGames", {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    references: {
+      model: User, // Link to User model
+      key: "username", // Reference username in the User table
+    },
+    onDelete: "CASCADE", // Optional: if a user is deleted, delete their games too
+  },
+  gameName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   status: {
     type: DataTypes.ENUM("Wishlisted", "Playing", "Completed", "100%ed"),
     allowNull: false,
-    defaultValue: "Wishlisted",
+    defaultValue: "Wishlisted", // Default status
   },
   startedOn: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
+    type: DataTypes.DATE,
+    allowNull: true, // Nullable if not started yet
   },
   finishedOn: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
+    type: DataTypes.DATE,
+    allowNull: true, // Nullable if not finished yet
   },
+  // Add cover field for storing the cover image URL
   cover: {
-    type: DataTypes.STRING, // URL for cover image
-    allowNull: true,
+    type: DataTypes.STRING,
+    allowNull: true, // Nullable in case there's no cover available
   },
 });
 
-// Establish the association between User and UserGame
-UserGame.belongsTo(User, {
-  foreignKey: "userId", // Foreign key in the UserGame table pointing to User
-  allowNull: false,
-});
-
-// Sync the models with the database
-sequelize.sync({ alter: true });
-
-module.exports = UserGame;
+module.exports = UserGames;

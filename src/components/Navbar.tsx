@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
 
   const handleLibraryClick = () => {
     if (username) {
-      navigate(`/my-library/${username}`); // Redirect to user's library page
+      navigate(`/my-library/${username}`); // Pass the username as a parameter
     }
   };
 

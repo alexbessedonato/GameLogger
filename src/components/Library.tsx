@@ -14,8 +14,8 @@ interface GameDetails {
 }
 
 const Library: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>(""); // Input value
-  const [suggestions, setSuggestions] = useState<Game[]>([]); // Suggested games
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Input value for game search
+  const [suggestions, setSuggestions] = useState<Game[]>([]); // Suggested games from search
   const [selectedGames, setSelectedGames] = useState<
     {
       details: GameDetails;
@@ -23,8 +23,9 @@ const Library: React.FC = () => {
       startedOn: string;
       finishedOn: string;
     }[]
-  >([]); // Selected games with status, dates, etc.
+  >([]);
 
+  // Fetch game suggestions
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchTerm.trim() === "") {
@@ -36,34 +37,30 @@ const Library: React.FC = () => {
         const response = await axios.post("http://localhost:5000/api/games", {
           search: searchTerm,
         });
-
-        setSuggestions(response.data); // Update the suggestions with API data
+        setSuggestions(response.data); // Update suggestions with API data
       } catch (error) {
         console.error("Error fetching game suggestions:", error);
       }
     };
 
-    // Fetch suggestions after a delay to avoid too many API calls
     const timeoutId = setTimeout(() => {
       fetchSuggestions();
     }, 300); // Debounce for 300ms
 
-    // Cleanup the timeout on component unmount or on new input
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
+  // Handle game selection
   const handleSelectGame = async (game: Game) => {
     try {
-      // Fetch game details from the backend
       const response = await axios.post(
         "http://localhost:5000/api/game-details",
-        {
-          game_name: game.name,
-        }
+        { game_name: game.name }
       );
 
       const gameDetails = response.data;
 
+      // Add the selected game to the list
       setSelectedGames((prev) => [
         ...prev,
         {
@@ -74,8 +71,8 @@ const Library: React.FC = () => {
         },
       ]);
 
-      setSearchTerm("");
-      setSuggestions([]);
+      setSearchTerm(""); // Clear the search term
+      setSuggestions([]); // Clear suggestions
     } catch (error) {
       console.error("Error fetching game details:", error);
     }
@@ -105,7 +102,7 @@ const Library: React.FC = () => {
     });
   };
 
-  // Function to render games by status
+  // Render games by status
   const renderGamesByStatus = (status: string) => {
     return selectedGames
       .filter((game) => game.status === status)
@@ -114,33 +111,28 @@ const Library: React.FC = () => {
           key={index}
           className="relative group bg-gray-800 rounded-lg shadow-md overflow-hidden"
         >
-          {/* Game Cover with Gradient Overlay */}
           <div className="relative w-full h-auto">
+            {/* Check if cover exists and replace 't_thumb' with 't_1080p' */}
             <img
               src={
                 game.details.cover
                   ? `https:${game.details.cover.url.replace(
                       "t_thumb",
                       "t_1080p"
-                    )}` // Replace thumb with 1080p for better quality
+                    )}`
                   : "https://via.placeholder.com/150"
               }
               alt={game.details.name}
               className="w-full h-auto object-cover"
             />
-
-            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-75"></div>
-
-            {/* Game Name */}
             <h3 className="absolute bottom-2 left-0 right-0 text-md font-bold text-cyan-400 text-center z-10 group-hover:-translate-y-60 transition-transform duration-300 ease-in-out">
               {game.details.name}
             </h3>
           </div>
 
-          {/* Hidden Content (Visible on Hover) */}
+          {/* Hidden content (shown on hover) */}
           <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gray-900 bg-opacity-90 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out">
-            {/* Status Toggle */}
             <div className="space-y-2">
               <label className="block">
                 <span className="text-gray-300">Status:</span>
@@ -157,7 +149,7 @@ const Library: React.FC = () => {
               </label>
             </div>
 
-            {/* Date Fields */}
+            {/* Date fields based on game status */}
             {game.status === "Playing" && (
               <div className="mt-2">
                 <label className="block">
@@ -173,7 +165,6 @@ const Library: React.FC = () => {
                 </label>
               </div>
             )}
-
             {(game.status === "Completed" || game.status === "100%ed") && (
               <div className="mt-2 space-y-4">
                 <label className="block">
@@ -206,7 +197,7 @@ const Library: React.FC = () => {
       ));
   };
 
-  // Helper function to conditionally render sections if there are games in that status
+  // Render sections by status
   const renderSection = (status: string, title: string) => {
     const games = selectedGames.filter((game) => game.status === status);
     if (games.length > 0) {
@@ -219,12 +210,12 @@ const Library: React.FC = () => {
         </div>
       );
     }
-    return null; // Return null if no games are in this status
+    return null; // Render nothing if no games in this status
   };
 
   return (
     <section className="relative min-h-screen text-white">
-      {/* Background with fade effect */}
+      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/images/pixelcut-export(1).jpeg')" }}
@@ -232,9 +223,8 @@ const Library: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-gray-800 via-gray-800/80 to-gray-800"></div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Search Bar at the top */}
+        {/* Search Bar */}
         <div className="relative max-w-2xl mx-auto mb-8">
           <input
             type="text"

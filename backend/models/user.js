@@ -5,6 +5,7 @@ const User = sequelize.define("User", {
   username: {
     type: DataTypes.STRING,
     allowNull: false,
+    primaryKey: true, // This is the primary key
   },
   email: {
     type: DataTypes.STRING,
