@@ -1,18 +1,23 @@
-// routes/gameLibrary.js
 const express = require("express");
-const UserGame = require("./models/UserGame"); // Import the UserGame model
-const User = require("./models/User"); // Import the User model
+const UserGames = require("../models/userGame"); // Import the UserGames model
 const router = express.Router();
 
 // POST /api/user-games - Add a game to the user's library
 router.post("/user-games", async (req, res) => {
   try {
-    const { name, cover, userId } = req.body; // Include userId in the request
-    const newGame = await UserGame.create({
-      name,
-      cover,
-      userId, // Link the game to the user
+    const { gameName, cover, username, status } = req.body;
+
+    // Store the `t_thumb` version in the database
+    const thumbCover = cover || null;
+
+    // Create a new entry in UserGames
+    const newGame = await UserGames.create({
+      gameName,
+      cover: thumbCover, // Save the thumb cover URL (unmodified)
+      username,
+      status: status || "Wishlisted", // Default to 'Wishlisted' if no status is provided
     });
+
     res.status(201).json(newGame);
   } catch (error) {
     console.error("Error adding game:", error);
@@ -20,40 +25,53 @@ router.post("/user-games", async (req, res) => {
   }
 });
 
-// PUT /api/user-games/:id - Update the status, dates, and more for a specific game
-router.put("/user-games/:id", async (req, res) => {
+// PUT /api/user-games - Update the status, dates, and more for a specific game by username and gameName
+router.put("/user-games", async (req, res) => {
+  const { username, gameName, status, startedOn, finishedOn } = req.body;
+
   try {
-    const { status, startedOn, finishedOn } = req.body;
-    const game = await UserGame.findByPk(req.params.id);
-    if (game) {
-      game.status = status;
-      game.startedOn = startedOn || null;
-      game.finishedOn = finishedOn || null;
-      await game.save();
-      res.status(200).json(game);
-    } else {
-      res.status(404).json({ error: "Game not found" });
+    // Find the game entry by username and gameName
+    const gameEntry = await UserGames.findOne({
+      where: { username, gameName },
+    });
+
+    if (!gameEntry) {
+      return res.status(404).json({ error: "Game not found in library" });
     }
+
+    // Update the game entry with new status and dates
+    gameEntry.status = status || gameEntry.status;
+    gameEntry.startedOn = startedOn || gameEntry.startedOn;
+    gameEntry.finishedOn = finishedOn || gameEntry.finishedOn;
+
+    await gameEntry.save(); // Save the updated game entry
+
+    return res.status(200).json(gameEntry); // Send the updated game entry back
   } catch (error) {
     console.error("Error updating game:", error);
     res.status(500).json({ error: "Failed to update game" });
   }
 });
 
-// GET /api/user-games?status=&userId= - Fetch games by status and userId
-router.get("/user-games", async (req, res) => {
+// GET /api/user-library - Fetch games by username
+router.get("/user-library", async (req, res) => {
   try {
-    const { status, userId } = req.query;
-    const games = await UserGame.findAll({
-      where: {
-        userId,
-        ...(status ? { status } : {}),
-      },
+    const { username } = req.query;
+
+    const games = await UserGames.findAll({ where: { username } });
+
+    // Modify the cover URL to return the 1080p version for display
+    const formattedGames = games.map((game) => {
+      return {
+        ...game.dataValues,
+        cover: game.cover ? game.cover.replace("t_thumb", "t_1080p") : null,
+      };
     });
-    res.status(200).json(games);
+
+    res.status(200).json(formattedGames);
   } catch (error) {
-    console.error("Error fetching games:", error);
-    res.status(500).json({ error: "Failed to fetch games" });
+    console.error("Error fetching user library:", error);
+    res.status(500).json({ error: "Failed to fetch user library" });
   }
 });
 
