@@ -89,101 +89,93 @@ const InsideGame: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-8">
-        <div className="bg-gray-800 bg-opacity-90 text-white p-6 rounded-lg shadow-lg">
+        <div className="bg-opacity-90 text-white p-6 rounded-lg shadow-lg">
           <h1 className="text-4xl font-bold mb-6 text-center">
             {gameDetails.name}
           </h1>
 
-          {/* Game Cover */}
-          <div className="flex justify-center mb-6">
-            <img
-              src={`https:${gameDetails.cover.url}`} // Use the 1080p cover image
-              alt={gameDetails.name}
-              className="rounded-lg shadow-lg w-full max-w-md"
-            />
-          </div>
+          {/* Layout for cover and text */}
+          <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
+            {/* Game Cover */}
+            <div className="flex-shrink-0 w-full md:w-1/3">
+              <img
+                src={`https:${gameDetails.cover.url}`} // Use the 1080p cover image
+                alt={gameDetails.name}
+                className="rounded-lg shadow-lg w-full"
+              />
+            </div>
 
-          {/* Game Information */}
-          <div className="space-y-6">
-            <p className="text-lg leading-relaxed text-gray-300">
-              {gameDetails.summary}
-            </p>
-            <p className="text-lg leading-relaxed text-gray-300">
-              {gameDetails.storyline}
-            </p>
+            {/* Game Information */}
+            <div className="flex flex-col space-y-4 md:w-2/3 text-left">
+              <p className="text-lg leading-relaxed text-gray-300">
+                {gameDetails.summary}
+              </p>
+              <p className="text-lg leading-relaxed text-gray-300">
+                {gameDetails.storyline}
+              </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Franchises */}
-              {gameDetails.franchises && (
+              {/* Grid layout for details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Row 1: Genres and Platforms */}
                 <div>
                   <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                    Franchises
+                    Genres
                   </h2>
                   <p className="text-gray-400">
-                    {gameDetails.franchises.map((f) => f.name).join(", ")}
+                    {gameDetails.genres.map((g) => g.name).join(", ")}
                   </p>
                 </div>
-              )}
 
-              {/* Genres */}
-              <div>
-                <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                  Genres
-                </h2>
-                <p className="text-gray-400">
-                  {gameDetails.genres.map((g) => g.name).join(", ")}
-                </p>
-              </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-cyan-400 mb-2">
+                    Platforms
+                  </h2>
+                  <p className="text-gray-400">
+                    {gameDetails.platforms.map((p) => p.name).join(", ")}
+                  </p>
+                </div>
 
-              {/* Platforms */}
-              <div>
-                <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                  Platforms
-                </h2>
-                <p className="text-gray-400">
-                  {gameDetails.platforms.map((p) => p.name).join(", ")}
-                </p>
-              </div>
+                {/* Row 2: Involved Companies and Rating */}
+                <div>
+                  <h2 className="text-2xl font-bold text-cyan-400 mb-2">
+                    Involved Companies
+                  </h2>
+                  <p className="text-gray-400">
+                    {gameDetails.involved_companies
+                      .map((ic) => ic.company.name)
+                      .join(", ")}
+                  </p>
+                </div>
 
-              {/* Companies */}
-              <div>
-                <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                  Involved Companies
-                </h2>
-                <p className="text-gray-400">
-                  {gameDetails.involved_companies
-                    .map((ic) => ic.company.name)
-                    .join(", ")}
-                </p>
-              </div>
-            </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-cyan-400 mb-2">
+                    Rating
+                  </h2>
+                  <p className="text-gray-400">
+                    {gameDetails.rating}/100 ({gameDetails.ratingCount} ratings)
+                  </p>
+                </div>
 
-            {/* Rating and Hypes */}
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                  Rating
-                </h2>
-                <p className="text-gray-400">
-                  {gameDetails.rating}/100 ({gameDetails.ratingCount} ratings)
-                </p>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-cyan-400 mb-2">Hypes</h2>
-                <p className="text-gray-400">{gameDetails.hypes}</p>
-              </div>
-            </div>
+                {/* Row 3: Hypes and First Release Date */}
+                <div>
+                  <h2 className="text-2xl font-bold text-cyan-400 mb-2">
+                    Hype Percentage
+                  </h2>
+                  <p className="text-gray-400">{gameDetails.hypes}%</p>
+                </div>
 
-            <div>
-              <h2 className="text-2xl font-bold text-cyan-400 mb-2">
-                First Release Date
-              </h2>
-              <p className="text-gray-400">
-                {new Date(
-                  gameDetails.first_release_date * 1000
-                ).toLocaleDateString()}{" "}
-                {/* Convert timestamp to date */}
-              </p>
+                <div>
+                  <h2 className="text-2xl font-bold text-cyan-400 mb-2">
+                    First Release Date
+                  </h2>
+                  <p className="text-gray-400">
+                    {new Date(
+                      gameDetails.first_release_date * 1000
+                    ).toLocaleDateString()}{" "}
+                    {/* Convert timestamp to date */}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -198,7 +190,7 @@ const InsideGame: React.FC = () => {
                   key={index}
                   src={`https:${screenshot.url}`} // Use the 1080p screenshots
                   alt={`Screenshot ${index + 1}`}
-                  className="rounded-lg shadow-lg"
+                  className="rounded-lg shadow-lg hover:scale-105 duration-200 transition-transform"
                 />
               ))}
             </div>
@@ -218,6 +210,7 @@ const InsideGame: React.FC = () => {
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
+                  className="rounded-xl hover:scale-105 duration-200 transition-transform"
                 ></iframe>
               ))}
             </div>

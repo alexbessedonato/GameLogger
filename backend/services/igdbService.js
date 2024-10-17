@@ -123,9 +123,18 @@ const getGameDetails = async (gameName) => {
 
     // Format total_rating to 2 decimal places if it exists
     const game = response.data[0];
+
+    if (game.rating) {
+      game.rating = game.rating.toFixed(2);
+    }
+
     if (game.total_rating) {
       game.total_rating = game.total_rating.toFixed(2);
     }
+
+    // Limit screenshots and videos to a maximum of 6 items
+    game.screenshots = game.screenshots ? game.screenshots.slice(0, 6) : [];
+    game.videos = game.videos ? game.videos.slice(0, 2) : [];
 
     return game; // Return the game details
   } catch (error) {
