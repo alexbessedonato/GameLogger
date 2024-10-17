@@ -119,25 +119,53 @@ const Library: React.FC = () => {
   };
 
   // Handle status change
-  const handleStatusChange = (index: number, newStatus: string) => {
-    setSelectedGames((prev) => {
-      const updatedGames = [...prev];
-      updatedGames[index].status = newStatus;
-      return updatedGames;
-    });
+  const handleStatusChange = async (index: number, newStatus: string) => {
+    const updatedGames = [...selectedGames];
+    const game = updatedGames[index];
+
+    game.status = newStatus;
+
+    setSelectedGames(updatedGames); // Update state for immediate UI change
+
+    try {
+      // Send updated game status to backend
+      await axios.put("http://localhost:5000/api/user-games", {
+        username,
+        gameName: game.name,
+        status: newStatus,
+        startedOn: game.startedOn,
+        finishedOn: game.finishedOn,
+      });
+    } catch (error) {
+      console.error("Error updating game status:", error);
+    }
   };
 
   // Handle date change for startedOn and finishedOn fields
-  const handleDateChange = (
+  const handleDateChange = async (
     index: number,
     dateType: "startedOn" | "finishedOn",
     value: string
   ) => {
-    setSelectedGames((prev) => {
-      const updatedGames = [...prev];
-      updatedGames[index][dateType] = value;
-      return updatedGames;
-    });
+    const updatedGames = [...selectedGames];
+    const game = updatedGames[index];
+
+    game[dateType] = value;
+
+    setSelectedGames(updatedGames); // Update state for immediate UI change
+
+    try {
+      // Send updated dates to backend
+      await axios.put("http://localhost:5000/api/user-games", {
+        username,
+        gameName: game.name,
+        status: game.status,
+        startedOn: game.startedOn,
+        finishedOn: game.finishedOn,
+      });
+    } catch (error) {
+      console.error("Error updating game dates:", error);
+    }
   };
 
   return (
@@ -194,7 +222,7 @@ const Library: React.FC = () => {
                     className="w-full h-auto object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-70"></div>
-                  <h3 className="absolute bottom-2 left-0 right-0 text-md font-bold text-cyan-400 text-center z-10 group-hover:-translate-y-60 transition-transform duration-300 ease-in-out">
+                  <h3 className="absolute bottom-2 left-0 right-0 text-md font-bold text-cyan-400 text-center z-10 group-hover:-translate-y-80 transition-transform duration-300 ease-in-out">
                     {game.name}
                   </h3>
                 </div>
