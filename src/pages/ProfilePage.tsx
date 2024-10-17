@@ -1,12 +1,14 @@
 import React from "react";
+import Navbar from "../components/Navbar";
+import Library from "../components/Library";
 
-const ProfilePage: React.FC = () => {
+const HomePage: React.FC = () => {
   return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold">Profile Page</h1>
-      <p>Welcome to your profile page!</p>
+    <div>
+      <Navbar />
+      <Library />
     </div>
   );
 };
 
-export default ProfilePage;
+export default HomePage;

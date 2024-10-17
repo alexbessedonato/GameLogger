@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import LoginPopUp from "./loginPopUp"; // Import the login pop-up component
-import SignUpPopUp from "./signUpPopUp"; // Import the login pop-up component
+import SignUpPopUp from "./signUpPopUp"; // Import the sign-up pop-up component
 
 const Navbar: React.FC = () => {
   const [username, setUsername] = useState<string | null>(null);
-
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+
+  const navigate = useNavigate(); // useNavigate for redirection
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,6 +33,13 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("username");
     setIsLoggedIn(false);
     setUsername(null);
+    navigate("/"); // Redirect to home page after logout
+  };
+
+  const handleLibraryClick = () => {
+    if (username) {
+      navigate(`/my-library/${username}`); // Redirect to user's library page
+    }
   };
 
   return (
@@ -72,12 +79,19 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link
-              to="/my-library"
-              className="block px-2 py-1 bg-gray-800 text-white text-lg rounded-md hover:text-white hover:bg-gray-600 transition duration-300"
-            >
-              My Library
-            </Link>
+            {/* Conditionally render the link or handle click event */}
+            {isLoggedIn ? (
+              <button
+                onClick={handleLibraryClick}
+                className="block px-2 py-1 bg-gray-800 text-white text-lg rounded-md hover:text-white hover:bg-gray-600 transition duration-300"
+              >
+                My Library
+              </button>
+            ) : (
+              <span className="block px-2 py-1 bg-gray-800 text-gray-400 text-lg rounded-md cursor-not-allowed">
+                My Library
+              </span>
+            )}
           </li>
         </ul>
 
@@ -116,6 +130,7 @@ const Navbar: React.FC = () => {
       <div className="pb-2"></div>
       <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-b from-gray-800 to-transparent"></div>
 
+      {/* Login and Signup Pop-ups */}
       {isLoginOpen && (
         <LoginPopUp
           closePopup={closeLogin}

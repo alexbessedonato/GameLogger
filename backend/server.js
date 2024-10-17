@@ -8,6 +8,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes"); // Ensure path is correct
+// In server.js
+const gameLibraryRoutes = require("./routes/gameLibrary"); // Import the game library routes
+app.use("/api", gameLibraryRoutes); // Use the game library routes
 
 console.log("DB Password:", process.env.DB_PASSWORD);
 
