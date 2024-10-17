@@ -1,7 +1,7 @@
 import React from "react";
 import HeroSection from "../components/HeroSection";
-import Navbar from "../components/Navbar";
 import SeachGames from "../components/SearchGames";
+import Navbar from "../components/Navbar";
 
 const HomePage: React.FC = () => {
   return (

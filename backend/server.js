@@ -23,6 +23,7 @@ sequelize
 
 const { searchGames } = require("./services/igdbService.js"); // Cambia esto por el nombre correcto de tu servicio
 const { getTopRatedGames } = require("./services/igdbService.js"); // Cambia esto por el nombre correcto de tu servicio
+const { getGameDetails } = require("./services/igdbService.js");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -76,6 +77,16 @@ app.post("/signup", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "User could not be created." });
+  }
+});
+
+app.post("/api/game-details", async (req, res) => {
+  const { game_name } = req.body; // Extract the game name from the request body
+  try {
+    const gameDetails = await getGameDetails(game_name); // Call the service to fetch the game details
+    res.json(gameDetails); // Send the game details as a JSON response
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching game details from IGDB" });
   }
 });
 

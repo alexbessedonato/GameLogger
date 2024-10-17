@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface TopGames {
   name: string;
@@ -21,7 +22,7 @@ const TopGames: React.FC = () => {
         setTopGames(response.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error al obtener los juegos TOP:", error);
+        console.error("Error fetching top games:", error);
         setLoading(false);
       }
     };
@@ -43,11 +44,11 @@ const TopGames: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mt-10">
         {topGames.length > 0 ? (
           topGames.map((game, index) => (
-            <div
+            <Link
               key={index}
+              to={`/games/${encodeURIComponent(game.name)}`} // Use game name in the URL
               className="bg-gray-900 rounded-lg shadow-lg overflow-hidden relative flex justify-center items-center"
             >
-              {/* Imagen del juego */}
               <div className="relative w-full">
                 <img
                   src={
@@ -58,18 +59,15 @@ const TopGames: React.FC = () => {
                   alt={game.name}
                   className="object-contain w-full h-full"
                 />
-                {/* Gradiente que se aplica sobre la imagen */}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
               </div>
-
-              {/* Contenedor del título y rating con gradiente superior */}
               <div className="absolute bottom-0 left-0 bg-gray-900 bg-opacity-35 p-2 w-full bg-gradient-to-t from-gray-900 to-transparent">
                 <h3 className="text-lg font-bold text-cyan-400">{game.name}</h3>
                 <h2 className="text-white text-xl font-bold">
                   {game.rating ? `${game.rating}/100` : "No rating available"}
                 </h2>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <p className="text-white text-center col-span-full">
