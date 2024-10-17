@@ -60,12 +60,12 @@ const getTopRatedGames = async () => {
     const accessToken = await getAuthToken();
 
     const response = await axios.post(
-      "https://api.igdb.com/v4/games", // POST en IGDB
+      "https://api.igdb.com/v4/games", // POST in IGDB
       `fields name,cover.url,summary,aggregated_rating,aggregated_rating_count;
        where aggregated_rating > 0;
        where aggregated_rating_count > 10;
        sort aggregated_rating desc;
-       limit 15;`, // Filtro para obtener los juegos mejor valorados
+       limit 15;`, // Filter to get top-rated games
       {
         headers: {
           "Client-ID": clientId,
@@ -78,7 +78,9 @@ const getTopRatedGames = async () => {
       name: game.name || "No Name Available",
       summary: game.summary || "No Summary Available",
       cover: game.cover ? `https:${game.cover.url}` : "No Cover Available",
-      rating: game.aggregated_rating || "No Rating Available",
+      rating: game.aggregated_rating
+        ? game.aggregated_rating.toFixed(2)
+        : "No Rating Available", // Format to 2 decimal places
     }));
 
     console.log("Top 10 Juegos mejor valorados:", games);
@@ -92,7 +94,48 @@ const getTopRatedGames = async () => {
   }
 };
 
+const getGameDetails = async (gameName) => {
+  try {
+    const accessToken = await getAuthToken();
+
+    const query = `search "${gameName}"; 
+      fields name,summary,cover.url,franchises.name,genres.name,involved_companies.company.name,platforms.name,parent_game.name,rating,rating_count,screenshots.url,storyline,total_rating,url,videos.video_id,dlcs.name,hypes,first_release_date;
+      limit 1;`;
+
+    console.log("Headers for IGDB request:", {
+      "Client-ID": clientId,
+      Authorization: `Bearer ${accessToken}`,
+    });
+
+    const response = await axios.post("https://api.igdb.com/v4/games", query, {
+      headers: {
+        "Client-ID": clientId,
+        Authorization: `Bearer ${accessToken}`, // Correct formatting for Bearer token
+        Accept: "application/json",
+      },
+    });
+
+    console.log("Response from IGDB:", response.data); // Log the full IGDB response for debugging
+
+    if (response.data.length === 0) {
+      throw new Error("No game found with that name");
+    }
+
+    // Format total_rating to 2 decimal places if it exists
+    const game = response.data[0];
+    if (game.total_rating) {
+      game.total_rating = game.total_rating.toFixed(2);
+    }
+
+    return game; // Return the game details
+  } catch (error) {
+    console.error("Error fetching game details from IGDB:", error.message);
+    throw new Error("Error fetching game details from IGDB");
+  }
+};
+
 module.exports = {
   searchGames,
   getTopRatedGames,
+  getGameDetails, // Export the updated function
 };
