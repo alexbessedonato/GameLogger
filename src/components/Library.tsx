@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom"; // Import useParams to get username from URL
 
 interface Game {
   id: number;
   name: string;
-  cover?: { url: string };
+  cover?: { url: string }; // Cover URL might be optional
 }
 
 interface GameDetails {
@@ -14,18 +15,12 @@ interface GameDetails {
 }
 
 const Library: React.FC = () => {
+  const { username } = useParams<{ username: string }>(); // Extract username from URL
   const [searchTerm, setSearchTerm] = useState<string>(""); // Input value for game search
   const [suggestions, setSuggestions] = useState<Game[]>([]); // Suggested games from search
-  const [selectedGames, setSelectedGames] = useState<
-    {
-      details: GameDetails;
-      status: string;
-      startedOn: string;
-      finishedOn: string;
-    }[]
-  >([]);
+  const [selectedGames, setSelectedGames] = useState<GameDetails[]>([]);
 
-  // Fetch game suggestions
+  // Fetch game suggestions from backend based on search term
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchTerm.trim() === "") {
@@ -50,167 +45,43 @@ const Library: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  // Handle game selection
+  // Handle game selection from search results
   const handleSelectGame = async (game: Game) => {
     try {
-      const response = await axios.post(
+      // Step 1: Get full game details, including the cover URL, by sending the game name to the backend
+      const detailsResponse = await axios.post(
         "http://localhost:5000/api/game-details",
         { game_name: game.name }
       );
+      const gameDetails = detailsResponse.data; // This contains the game details, including the cover URL
 
-      const gameDetails = response.data;
+      // Step 2: Send the game data (including the `t_thumb` cover URL) to the backend to save to the user library
+      const thumbCover = gameDetails.cover?.url || null; // Get the `t_thumb` version of the cover
 
-      // Add the selected game to the list
+      await axios.post("http://localhost:5000/api/user-games", {
+        gameName: gameDetails.name,
+        cover: thumbCover, // Use the t_thumb version for the database
+        username, // Add the username for tracking
+      });
+
+      // Step 3: Add the game to the selected games in the frontend (for UI display)
       setSelectedGames((prev) => [
         ...prev,
         {
-          details: gameDetails,
-          status: "Wishlisted", // Default status
-          startedOn: "",
-          finishedOn: "",
+          name: gameDetails.name,
+          cover: gameDetails.cover
+            ? { url: gameDetails.cover.url.replace("t_thumb", "t_1080p") }
+            : undefined, // Use the high-res cover for frontend display
+          summary: gameDetails.summary || "",
         },
       ]);
 
-      setSearchTerm(""); // Clear the search term
-      setSuggestions([]); // Clear suggestions
+      // Clear search term and suggestions after selection
+      setSearchTerm("");
+      setSuggestions([]);
     } catch (error) {
-      console.error("Error fetching game details:", error);
+      console.error("Error adding game to user library:", error);
     }
-  };
-
-  // Handle status change immutably
-  const handleStatusChange = (index: number, newStatus: string) => {
-    setSelectedGames((prev) => {
-      const updatedGames = [...prev];
-      updatedGames[index] = {
-        ...updatedGames[index],
-        status: newStatus,
-      };
-      return updatedGames;
-    });
-  };
-
-  // Handle date changes immutably
-  const handleDateChange = (index: number, dateType: string, value: string) => {
-    setSelectedGames((prev) => {
-      const updatedGames = [...prev];
-      updatedGames[index] = {
-        ...updatedGames[index],
-        [dateType]: value,
-      };
-      return updatedGames;
-    });
-  };
-
-  // Render games by status
-  const renderGamesByStatus = (status: string) => {
-    return selectedGames
-      .filter((game) => game.status === status)
-      .map((game, index) => (
-        <div
-          key={index}
-          className="relative group bg-gray-800 rounded-lg shadow-md overflow-hidden"
-        >
-          <div className="relative w-full h-auto">
-            {/* Check if cover exists and replace 't_thumb' with 't_1080p' */}
-            <img
-              src={
-                game.details.cover
-                  ? `https:${game.details.cover.url.replace(
-                      "t_thumb",
-                      "t_1080p"
-                    )}`
-                  : "https://via.placeholder.com/150"
-              }
-              alt={game.details.name}
-              className="w-full h-auto object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-75"></div>
-            <h3 className="absolute bottom-2 left-0 right-0 text-md font-bold text-cyan-400 text-center z-10 group-hover:-translate-y-60 transition-transform duration-300 ease-in-out">
-              {game.details.name}
-            </h3>
-          </div>
-
-          {/* Hidden content (shown on hover) */}
-          <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gray-900 bg-opacity-90 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out">
-            <div className="space-y-2">
-              <label className="block">
-                <span className="text-gray-300">Status:</span>
-                <select
-                  className="block w-full p-2 mt-1 rounded bg-gray-700 text-white"
-                  value={game.status}
-                  onChange={(e) => handleStatusChange(index, e.target.value)}
-                >
-                  <option value="Wishlisted">Wishlisted</option>
-                  <option value="Playing">Playing</option>
-                  <option value="Completed">Completed</option>
-                  <option value="100%ed">100%ed</option>
-                </select>
-              </label>
-            </div>
-
-            {/* Date fields based on game status */}
-            {game.status === "Playing" && (
-              <div className="mt-2">
-                <label className="block">
-                  <span className="text-gray-300">Started On:</span>
-                  <input
-                    type="date"
-                    className="block w-full p-2 mt-1 rounded bg-gray-700 text-white"
-                    value={game.startedOn}
-                    onChange={(e) =>
-                      handleDateChange(index, "startedOn", e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-            )}
-            {(game.status === "Completed" || game.status === "100%ed") && (
-              <div className="mt-2 space-y-4">
-                <label className="block">
-                  <span className="text-gray-300">Started On:</span>
-                  <input
-                    type="date"
-                    className="block w-full p-2 mt-1 rounded bg-gray-700 text-white"
-                    value={game.startedOn}
-                    onChange={(e) =>
-                      handleDateChange(index, "startedOn", e.target.value)
-                    }
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="text-gray-300">Finished On:</span>
-                  <input
-                    type="date"
-                    className="block w-full p-2 mt-1 rounded bg-gray-700 text-white"
-                    value={game.finishedOn}
-                    onChange={(e) =>
-                      handleDateChange(index, "finishedOn", e.target.value)
-                    }
-                  />
-                </label>
-              </div>
-            )}
-          </div>
-        </div>
-      ));
-  };
-
-  // Render sections by status
-  const renderSection = (status: string, title: string) => {
-    const games = selectedGames.filter((game) => game.status === status);
-    if (games.length > 0) {
-      return (
-        <div className="mt-6">
-          <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {renderGamesByStatus(status)}
-          </div>
-        </div>
-      );
-    }
-    return null; // Render nothing if no games in this status
   };
 
   return (
@@ -248,11 +119,32 @@ const Library: React.FC = () => {
           )}
         </div>
 
-        {/* Sections */}
-        {renderSection("Playing", "Playing")}
-        {renderSection("100%ed", "100%ed")}
-        {renderSection("Completed", "Completed")}
-        {renderSection("Wishlisted", "Wishlisted")}
+        {/* Display selected games (UI purpose) */}
+        {selectedGames.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {selectedGames.map((game, index) => (
+              <div
+                key={index}
+                className="relative bg-gray-800 rounded-lg shadow-md overflow-hidden"
+              >
+                <div className="relative w-full h-auto">
+                  <img
+                    src={
+                      game.cover
+                        ? `https:${game.cover.url}`
+                        : "https://via.placeholder.com/150"
+                    }
+                    alt={game.name}
+                    className="w-full h-auto object-cover"
+                  />
+                  <h3 className="absolute bottom-2 left-0 right-0 text-md font-bold text-cyan-400 text-center z-10">
+                    {game.name}
+                  </h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
