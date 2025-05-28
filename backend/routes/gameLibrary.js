@@ -1,5 +1,5 @@
 const express = require("express");
-const UserGames = require("../models/userGame"); // Import the UserGames model
+const UserGames = require("../models/UserGame"); // Import the UserGames model
 const router = express.Router();
 
 // POST /api/user-games - Add a game to the user's library
