@@ -11,6 +11,9 @@ const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes"); // Ensure path is correct
 const gameLibraryRoutes = require("./routes/gameLibrary.js"); // Import the game library routes
 
+User.hasMany(UserGames, { foreignKey: "username" });
+UserGames.belongsTo(User, { foreignKey: "username" });
+
 // Sync all models and alter the database schema to match the models
 sequelize
   .sync({ alter: true }) // Ensures the schema is updated
