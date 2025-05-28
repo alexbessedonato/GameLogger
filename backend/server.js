@@ -11,8 +11,6 @@ const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes"); // Ensure path is correct
 const gameLibraryRoutes = require("./routes/gameLibrary.js"); // Import the game library routes
 
-console.log("DB Password:", process.env.DB_PASSWORD);
-
 // Sync all models and alter the database schema to match the models
 sequelize
   .sync({ alter: true }) // Ensures the schema is updated
@@ -29,9 +27,6 @@ const { getGameDetails } = require("./services/igdbService.js");
 
 const app = express();
 const port = process.env.PORT || 5000;
-
-console.log("Client ID:", process.env.TWITCH_CLIENT_ID);
-console.log("Client Secret:", process.env.TWITCH_CLIENT_SECRET);
 
 app.use(cors());
 app.use(express.json());
@@ -62,20 +57,38 @@ app.post("/api/top-rated-games", async (req, res) => {
   }
 });
 
-// Signup route
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.post("/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios." });
+    }
+
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: "El email ya está registrado." });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       username,
       email,
       password: hashedPassword,
     });
-    res.json(newUser);
+
+    res
+      .status(201)
+      .json({ message: "Usuario creado", username: newUser.username });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "User could not be created." });
+    console.error("Error al crear usuario:", error);
+    res.status(500).json({ error: "No se pudo crear el usuario." });
   }
 });
 
